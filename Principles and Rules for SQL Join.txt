@@ -1,0 +1,307 @@
+# Principles and Rules for SQL Joins
+
+These are the best practices every beginner should follow.
+
+---
+
+# 1. Always Identify the Common Column
+
+Before writing a JOIN, ask:
+
+> **What column connects these two tables?**
+
+Usually:
+
+* Primary Key (PK)
+* Foreign Key (FK)
+
+Example:
+
+```text
+Departments
+-----------
+dept_id (PK)
+
+Employees
+----------
+dept_id (FK)
+```
+
+Join using:
+
+```sql
+ON e.dept_id = d.dept_id
+```
+
+---
+
+# 2. Always Use the ON Clause
+
+Every JOIN (except CROSS JOIN) needs a join condition.
+
+✅ Correct
+
+```sql
+SELECT *
+FROM employee e
+INNER JOIN department d
+ON e.dept_id = d.dept_id;
+```
+
+❌ Wrong
+
+```sql
+SELECT *
+FROM employee e
+INNER JOIN department d;
+```
+
+Without `ON`, SQL doesn't know how to match rows.
+
+---
+
+# 3. Choose the Correct Join
+
+| Requirement               | Join            |
+| ------------------------- | --------------- |
+| Only matching records     | INNER JOIN      |
+| Keep all left table rows  | LEFT JOIN       |
+| Keep all right table rows | RIGHT JOIN      |
+| Keep all rows             | FULL OUTER JOIN |
+| Every row with every row  | CROSS JOIN      |
+| Same table with itself    | SELF JOIN       |
+
+---
+
+# 4. Use Table Aliases
+
+Instead of writing long table names:
+
+```sql
+SELECT employee.employee_name
+FROM employee;
+```
+
+Use aliases:
+
+```sql
+SELECT e.employee_name
+FROM employee e;
+```
+
+This makes queries shorter and easier to read.
+
+---
+
+# 5. Join Before Filtering
+
+General SQL order:
+
+```text
+FROM
+   ↓
+JOIN
+   ↓
+ON
+   ↓
+WHERE
+   ↓
+GROUP BY
+   ↓
+HAVING
+   ↓
+ORDER BY
+```
+
+Example:
+
+```sql
+SELECT e.emp_name,
+       d.dept_name
+FROM employee e
+INNER JOIN department d
+ON e.dept_id = d.dept_id
+WHERE d.dept_name = 'IT';
+```
+
+---
+
+# 6. Avoid CROSS JOIN Unless Needed
+
+A CROSS JOIN returns every possible combination of rows.
+
+Example:
+
+Employees = 100 rows
+
+Departments = 10 rows
+
+Result:
+
+```text
+100 × 10 = 1000 rows
+```
+
+On large tables, this can produce huge results.
+
+---
+
+# 7. Select Only Needed Columns
+
+❌ Avoid:
+
+```sql
+SELECT *
+FROM employee e
+INNER JOIN department d
+ON e.dept_id = d.dept_id;
+```
+
+✅ Better:
+
+```sql
+SELECT e.emp_name,
+       d.dept_name
+FROM employee e
+INNER JOIN department d
+ON e.dept_id = d.dept_id;
+```
+
+Returning only the required columns improves readability and can reduce unnecessary data transfer.
+
+---
+
+# 8. Know Which Table Is Left and Right
+
+Example:
+
+```sql
+FROM employee e
+LEFT JOIN department d
+```
+
+* Left table = `employee`
+* Right table = `department`
+
+This matters because LEFT JOIN always keeps all rows from the left table.
+
+---
+
+# 9. Check for NULL Values in Outer Joins
+
+To find records with no match:
+
+```sql
+SELECT s.state_name
+FROM state s
+LEFT JOIN city c
+ON s.state_id = c.state_id
+WHERE c.city_id IS NULL;
+```
+
+This returns states that don't have any cities.
+
+---
+
+# 10. Understand the Business Question First
+
+Don't choose a join before understanding what is being asked.
+
+Example:
+
+> Show employees and their departments.
+
+→ **INNER JOIN**
+
+> Show all departments, even those without employees.
+
+→ **RIGHT JOIN** (or **LEFT JOIN** if you start from the department table)
+
+> Show all employees, even if they are not assigned to a department.
+
+→ **LEFT JOIN**
+
+---
+
+# Common Mistakes to Avoid
+
+### ❌ Missing Join Condition
+
+```sql
+SELECT *
+FROM employee
+JOIN department;
+```
+
+Always use `ON`.
+
+---
+
+### ❌ Joining Wrong Columns
+
+```sql
+ON employee.emp_id = department.dept_id
+```
+
+Wrong.
+
+Join related columns:
+
+```sql
+ON employee.dept_id = department.dept_id
+```
+
+---
+
+### ❌ Forgetting Aliases
+
+Hard to read:
+
+```sql
+employee.employee_name
+```
+
+Better:
+
+```sql
+e.employee_name
+```
+
+---
+
+### ❌ Using `SELECT *` Everywhere
+
+Only select the columns you need.
+
+---
+
+### ❌ Choosing the Wrong Join
+
+If you need unmatched rows, don't use `INNER JOIN`.
+
+---
+
+# Golden Rules for Joins
+
+```text
+1. Find the common column.
+2. Use the correct JOIN type.
+3. Always write the ON condition.
+4. Use table aliases (e, d, c, s).
+5. Filter with WHERE after joining.
+6. Select only required columns.
+7. Avoid CROSS JOIN unless required.
+8. Check for NULL when using OUTER JOINs.
+9. Understand the business requirement first.
+10. Verify your output after running the query.
+```
+
+## Interview Tip
+
+Before writing any JOIN, ask yourself these three questions:
+
+1. **Which tables am I joining?**
+2. **Which column connects them?** (PK ↔ FK)
+3. **Do I need only matching rows, or also unmatched rows?**
+
+If you answer these three questions first, you'll usually choose the correct JOIN and write the query correctly.
