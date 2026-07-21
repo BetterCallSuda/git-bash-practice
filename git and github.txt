@@ -1,1 +1,3 @@
+Git working flow --
 
+Workstation --> VSC --> git --> github --> developers
